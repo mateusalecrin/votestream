@@ -1,0 +1,146 @@
+### Variáveis
+@baseUrl = http://localhost:8082
+
+### ============================
+### USERS
+### ============================
+
+### Criar usuário
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "mateus",
+  "email": "mateus@example.com"
+}
+
+### Criar usuário com e-mail repetido (deve retornar 409 Conflict)
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "Outro Mateus",
+  "email": "mateus@example.com"
+}
+
+### Criar usuário com dados inválidos (deve retornar 400 Bad Request)
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "",
+  "email": "asdsadsa"
+}
+
+### Listar todos os usuários
+GET {{baseUrl}}/users
+
+### Buscar usuário por id
+GET {{baseUrl}}/users/1
+
+### Buscar usuário inexistente (deve retornar 404 Not Found)
+GET {{baseUrl}}/users/9999
+
+
+### ============================
+### POLLS
+### ============================
+
+### Criar poll (troque ownerId por um id de usuário existente)
+POST {{baseUrl}}/polls
+Content-Type: application/json
+
+{
+  "title": "Linguagem preferida",
+  "question": "Qual linguagem você mais gosta de usar?",
+  "ownerId": 1
+}
+
+### Listar todas as polls
+GET {{baseUrl}}/polls
+
+### Listar polls filtrando por status
+GET {{baseUrl}}/polls?status=OPEN
+
+### Buscar poll por id
+GET {{baseUrl}}/polls/1
+
+### Buscar poll inexistente (deve retornar 404 Not Found)
+GET {{baseUrl}}/polls/9999
+
+### Fechar poll (troque {id} pelo id da poll criada acima)
+PATCH {{baseUrl}}/polls/1/close
+
+### Fechar poll que já está fechada (deve retornar 422 Unprocessable Entity)
+PATCH {{baseUrl}}/polls/1/close
+
+### Cancelar poll
+PATCH {{baseUrl}}/polls/1/cancel
+
+
+### ============================
+### OPTIONS
+### ============================
+
+### Criar opção para a poll (poll precisa estar OPEN)
+POST {{baseUrl}}/polls/1/options
+Content-Type: application/json
+
+{
+  "text": "Java"
+}
+
+### Criar outra opção para a mesma poll
+POST {{baseUrl}}/polls/1/options
+Content-Type: application/json
+
+{
+  "text": "Kotlin"
+}
+
+### Criar opção numa poll inexistente (deve retornar 404 Not Found)
+POST {{baseUrl}}/polls/9999/options
+Content-Type: application/json
+
+{
+  "text": "Java"
+}
+
+### Listar opções de uma poll
+GET {{baseUrl}}/polls/1/options
+
+
+### ============================
+### VOTES
+### ============================
+
+### Registrar voto (troque os ids pelos existentes no seu banco)
+POST {{baseUrl}}/votes
+Content-Type: application/json
+
+{
+  "pollId": 1,
+  "optionId": 1,
+  "userId": 1
+}
+
+### Votar de novo no mesmo poll com o mesmo usuário (deve retornar 409 Conflict)
+POST {{baseUrl}}/votes
+Content-Type: application/json
+
+{
+  "pollId": 1,
+  "optionId": 1,
+  "userId": 1
+}
+
+
+### ============================
+### RESULTS
+### ============================
+
+### Resultado da poll (contagem de votos por opção)
+GET {{baseUrl}}/polls/1/results
+
+### Resultado da poll, informando o usuário (mostra em qual opção ele votou)
+GET {{baseUrl}}/polls/1/results?userId=1
