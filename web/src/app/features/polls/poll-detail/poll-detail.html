@@ -1,0 +1,81 @@
+<div class="flex min-h-screen w-full flex-col items-center px-4 py-12 sm:py-16">
+  <div class="w-full max-w-xl">
+    <a routerLink="/polls" class="mb-6 inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700">
+      ← Voltar
+    </a>
+
+    @if (loading()) {
+      <div class="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white/60 py-16 text-slate-400">
+        <svg class="h-6 w-6 animate-spin" viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4Z"></path>
+        </svg>
+        <p class="text-sm">Carregando...</p>
+      </div>
+    } @else if (error()) {
+      <div class="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">
+        <span class="text-lg leading-none">⚠️</span>
+        <p class="text-sm">{{ error() }}</p>
+      </div>
+    } @else if (results(); as r) {
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="mb-1 flex items-center justify-between gap-3">
+          <h1 class="text-xl font-semibold text-slate-900">{{ r.title }}</h1>
+          <span class="rounded-full px-2.5 py-1 text-xs font-medium {{ statusClass(r.status) }}">{{ r.status }}</span>
+        </div>
+        <p class="mb-6 text-sm text-slate-500">{{ r.question }}</p>
+
+        @if (r.status === 'OPEN' && r.userVotedOptionId === null) {
+          <div class="flex flex-col gap-2">
+            @for (option of r.options; track option.optionId) {
+              <label
+                class="flex cursor-pointer items-center gap-3 rounded-xl border p-3 text-sm transition"
+                [class.border-indigo-500]="selectedOptionId() === option.optionId"
+                [class.bg-indigo-50]="selectedOptionId() === option.optionId"
+                [class.border-slate-200]="selectedOptionId() !== option.optionId"
+              >
+                <input
+                  type="radio"
+                  name="option"
+                  class="accent-indigo-600"
+                  [checked]="selectedOptionId() === option.optionId"
+                  (change)="selectedOptionId.set(option.optionId)"
+                />
+                {{ option.text }}
+              </label>
+            }
+          </div>
+
+          <button
+            type="button"
+            (click)="vote()"
+            [disabled]="selectedOptionId() === null || voting()"
+            class="mt-5 w-full rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {{ voting() ? 'Enviando voto...' : 'Votar' }}
+          </button>
+        } @else {
+          <div class="flex flex-col gap-3">
+            @for (option of r.options; track option.optionId) {
+              <div>
+                <div class="mb-1 flex items-center justify-between text-sm">
+                  <span class="font-medium text-slate-700" [class.text-indigo-600]="r.userVotedOptionId === option.optionId">
+                    {{ option.text }}
+                    @if (r.userVotedOptionId === option.optionId) {
+                      <span class="ml-1 text-xs">✓ seu voto</span>
+                    }
+                  </span>
+                  <span class="text-slate-500">{{ option.voteCount }} ({{ percentage(option.voteCount) }}%)</span>
+                </div>
+                <div class="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                  <div class="h-full rounded-full bg-indigo-500" [style.width.%]="percentage(option.voteCount)"></div>
+                </div>
+              </div>
+            }
+            <p class="mt-2 text-xs text-slate-400">{{ totalVotes() }} voto(s) no total</p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
